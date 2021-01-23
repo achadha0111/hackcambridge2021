@@ -1,6 +1,8 @@
 <template>
   <div>
     <div v-if="feedElements">
+
+      <!-- News card -->
       <md-card v-if="currentCardType === 'news_headline'">
         <md-card-header>
           <md-avatar>
@@ -28,6 +30,33 @@
           <md-button v-on:click="submitRating">Submit</md-button>
         </md-card-actions>
       </md-card>
+      <!-- News card -->
+
+      <!-- Video -->
+      <md-card v-if="currentCardType === 'video'">
+        <md-card-header>
+          <div class="md-title">Is this video fake?</div>
+          <div class="md-subhead">Answer yes or no to proceed</div>
+        </md-card-header>
+
+        <md-card-media>
+          <!-- Todo add video link -->
+<!--          <img src="/assets/examples/avatar-2.jpg" alt="People">-->
+        </md-card-media>
+
+        <md-card-content>
+          <div class="rating-spectrum">
+            <md-radio v-model="rating" :value=1>Fake</md-radio>
+            <md-radio v-model="rating" :value=0>Not fake</md-radio>
+          </div>
+        </md-card-content>
+
+        <md-card-actions>
+          <md-button v-on:click="submitRating">Submit</md-button>
+        </md-card-actions>
+      </md-card>
+      <!-- Video -->
+
     </div>
   </div>
 </template>
@@ -51,7 +80,7 @@
       currentCard: 0,
       reachedEndOfFeed: false,
       rating: null,
-      userInteractionEvents: []
+      userInteractionEvents: [],
     }),
 
     methods: {
@@ -64,7 +93,7 @@
         this.userInteractionEvents.push(event);
         let nextCard = this.currentCard + 1;
 
-        if (nextCard !== length(this.feedElements)) {
+        if (nextCard !== length(this.feedElements)-1) {
           this.currentCard = nextCard;
           this.currentCardType = this.feedElements[nextCard].type;
         }
