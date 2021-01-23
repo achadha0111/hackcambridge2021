@@ -33,9 +33,11 @@
       <!-- News card -->
 
       <!-- Video -->
-      <md-card v-if="currentCardType === 'video'">
+      <md-card v-if="currentCardType === 'video' || currentCardType === 'fake_headline'">
         <md-card-header>
-          <div class="md-title">Is this video fake?</div>
+          <div v-if="currentCardType === 'video'"
+               class="md-title">Is this video fake?</div>
+          <div v-else class="md-title"> Is this a misleading headline?</div>
           <div class="md-subhead">Answer yes or no to proceed</div>
         </md-card-header>
 
