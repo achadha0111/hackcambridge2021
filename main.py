@@ -5,21 +5,46 @@ import random
 import json
 import pyodbc
 
-
 app = Flask(__name__)
-
 
 server = os.getenv('SERVER')
 database = 'votingDB'
 username = os.getenv('USERNAME')
 password = os.getenv('PASSWORD')
-driver= '{ODBC Driver 17 for SQL Server}'
+driver = '{ODBC Driver 17 for SQL Server}'
 
 
-with pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM CARD")
-        row = cursor.fetchone()
-        while row:
-            print (str(row[0]) + " " + str(row[1]))
-            row = cursor.fetchone()
+@app.route('/feed', methods=["GET"])
+def get_feed_items():
+    feed_items = request_feed_items()
+    result = Response(json.dumps(feed_items))
+    result.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    return result, 200
+
+
+@app.route('/postevent', methods=["POST"])
+def post_user_interactions(interactions):
+    pass
+
+
+"Returns some random cards from the database"
+
+
+def request_feed_items():
+    query = "SELECT top 30 percent CARD.CARDTYPE, " \
+            "opinion.sourcelink, headline, leaning, " \
+            "ISFAKE, STARTTIME, ENDTIME, video.sourcelink " \
+            "from [dbo].[CARD] as card FULL JOIN [dbo].[POLIOPINION] " \
+            "as opinion on card.CARDID = opinion.CARDID " \
+            "FULL JOIN [dbo].[VIDEO] as video ON card.CARDID = video.CARDID ORDER BY newid()"
+
+    query_result = run_query(query)
+    return query_result
+
+
+def run_query(query):
+    with pyodbc.connect(
+            'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            return cursor.fetchall()
