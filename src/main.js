@@ -12,7 +12,7 @@ import 'vue-material/dist/theme/default.css';
 
 Vue.config.productionTip = false
 
-Vue.use(VueYouTubeEmbed);
+Vue.use(VueYouTubeEmbed, { global: true, componentId: "youtube-media" })
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
 

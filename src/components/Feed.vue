@@ -183,13 +183,17 @@ async function fetchFeedElements(callback) {
 
     methods: {
       submitRating: function () {
-        // let event = {
-        //   "user_id": "User 1",
-        //   "item_id": this.feedElements[this.currentCardIndex].id,
-        //   "rating": this.rating
-        // }
-        //
-        // this.userInteractionEvents.push(event);
+        let event = {
+          "user_id": "100",
+          "card_id": this.currentCard["CARDID"],
+          "rating": this.rating,
+          "type": this.currentCardType,
+          "leaning": this.currentCard["leaning"],
+          "isfake": this.currentCardType === "V" ? this.currentCard["vfake"] : this.currentCard["hfake"]
+        }
+
+        this.userInteractionEvents.push(event);
+
         let nextCard = this.currentCardIndex + 1;
 
         if (nextCard !== (this.feedElements).length) {
@@ -202,6 +206,7 @@ async function fetchFeedElements(callback) {
           this.reachedEndOfFeed = true;
           this.currentCardIndex = 0;
           this.currentCard = null;
+          this.postToDb(this.userInteractionEvents);
           // TODO send interaction events to database
         }
       },
@@ -231,7 +236,15 @@ async function fetchFeedElements(callback) {
 
 
         }
+      },
+      postToDb: async function(userInteractionEvents) {
+        console.log(userInteractionEvents)
+        let result = await axios.post(`http://127.0.0.1:5000/postevent`, {userInteractionEvents});
+        let test = await axios.post(`http://127.0.0.1:5000/postevent/${userInteractionEvents}`);
+        if (result.status !== 200 || test) {
+          this.postFailed = false;
+        }
       }
     }
-  }
+    }
 </script>
