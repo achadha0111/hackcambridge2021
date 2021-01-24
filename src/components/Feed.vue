@@ -3,13 +3,8 @@
     <div v-if="feedElements">
 
       <!-- News card -->
-      <md-card v-if="currentCardType === 'news_headline'">
+      <md-card v-if="currentCardType === 'P'">
         <md-card-header>
-          <md-avatar>
-            <!-- TODO add  news outlet logo-->
-<!--            <img src={{currentCard.source_logo}} alt="Avatar">-->
-          </md-avatar>
-
           <div class="md-title">{{feedElements[currentCard].headline}}</div>
           <div class="md-subhead">{{feedElements[currentCard].friends_interactions}}</div>
         </md-card-header>
@@ -82,7 +77,17 @@
 </style>
 
 <script>
-  import connection from "@/db_config/db_config";
+import axios from 'axios';
+
+async function fetchFeedElements(callback) {
+    try {
+      let elements = await axios.get(`http://127.0.0.1:5000/feed`);
+      callback(null, elements);
+    } catch (e) {
+      callback(e, null);
+      console.log(e);
+    }
+  }
 
   export default {
     name: "Feed",
@@ -93,11 +98,17 @@
       reachedEndOfFeed: false,
       rating: null,
       userInteractionEvents: [],
+      error: null,
     }),
 
-    // created() {
-    //
-    // },
+    created() {
+
+      fetchFeedElements((err, feedElements) => {
+        this.setData(err, feedElements);
+      })
+
+
+    },
 
     methods: {
       submitRating: () => {
@@ -117,6 +128,17 @@
         else {
           this.reachedEndOfFeed = true;
           // TODO send interaction events to database
+        }
+      },
+
+      setData(err, feedElements) {
+        if (err) {
+          this.error = err.toString;
+          console.log(this.error);
+        } else {
+          this.feedElements = feedElements.data;
+          console.log(this.feedElements);
+          this.currentCardType = this.feedElements[this.currentCard];
         }
       }
     }
