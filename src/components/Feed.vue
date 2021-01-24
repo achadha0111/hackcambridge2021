@@ -4,7 +4,6 @@
       <div class="md-layout-item"></div>
       <div class="md-layout-item md-size-50">
         <div :key="currentCardIndex" v-if="currentCard" >
-
           <!-- News card -->
           <md-card v-if="currentCardType === 'P'">
             <md-card-header>
@@ -16,15 +15,26 @@
               <a :href = "currentCard['opinion_source']">{{ currentCard["opinion_source"] }}</a>
               <h3 class="md-subheading">Where do you think this article lies on the political spectrum?</h3>
               <div class="rating-spectrum">
-                <md-radio v-model="rating" value="sLeft">Strongly Left</md-radio>
-                <md-radio v-model="rating" value="Left">Left</md-radio>
-                <md-radio v-model="rating" value="Centre">Centre</md-radio>
-                <md-radio v-model="rating" value="Right">Right</md-radio>
-                <md-radio v-model="rating" value="sRight">Strongly Right</md-radio>
+                <md-radio v-model="rating" value="0">Strongly Left</md-radio>
+                <md-radio v-model="rating" value="1">Left</md-radio>
+                <md-radio v-model="rating" value="2">Centre</md-radio>
+                <md-radio v-model="rating" value="3">Right</md-radio>
+                <md-radio v-model="rating" value="4">Strongly Right</md-radio>
               </div>
             </md-card-content>
 
-            <md-button v-on:click="submitRating">Submit</md-button>
+            <md-card-expand-trigger>
+              <md-button>Submit</md-button>
+            </md-card-expand-trigger>
+
+            <md-card-expand-content>
+              <!-- If left -->
+              <md-card-content>
+                Correctly identified. We'd however recommend looking at other perspectives as well!
+              </md-card-content>
+              <md-button class="md-accent" v-on:click="submitRating">Got it</md-button>
+            </md-card-expand-content>
+
 
           </md-card>
           <!-- News card -->
@@ -59,17 +69,56 @@
                 <!--          </div>-->
 
                 <div class="rating-spectrum">
-                  <md-radio v-model="rating" :value=1>Fake</md-radio>
-                  <md-radio v-model="rating" :value=0>Not fake</md-radio>
+                  <md-radio v-model="rating" value="1">Fake</md-radio>
+                  <md-radio v-model="rating" value="0">Not fake</md-radio>
                 </div>
               </md-card-content>
 
 
-              <md-button v-on:click="submitRating" class="md-raised md-accent">Submit</md-button>
+              <md-card-expand-trigger>
+                <md-button>Submit</md-button>
+              </md-card-expand-trigger>
+
+              <md-card-expand-content>
+                <!-- If correct -->
+                <md-card-content v-if="rating === currentCard['vfake'] || rating === currentCard['hfake']">
+                  Correctly identified. You have got it!
+                </md-card-content>
+                <!-- If FN - headline works -->
+                <md-card-content v-else-if="rating !== currentCard['hfake'] && currentCard['hfake'] === '1'
+                && currentCardType === 'H'">
+                  That is fake news actually. For identifying fake news, DO NOT form an opinion just on the
+                  headline, but also look at the publication (it could be satirical) and whether the headline agrees with
+                  the content of the article.
+                </md-card-content>
+
+                <!-- If FP - headline -->
+                <md-card-content v-else-if="rating !== currentCard['hfake'] && currentCard['hfake'] === '0'
+                && currentCardType === 'H'">
+                  That headline is actually true. Usually, reputable sources with factual information publish accurate
+                  stories.
+                </md-card-content>
+
+                <md-card-content v-else-if="rating !== currentCard['vfake'] && currentCard['vfake'] === '1'
+                && currentCardType === 'V'">
+                  This is a deepfake!
+                  <md-list>
+                    <md-list-item>Pay attention to the face.</md-list-item>
+                    <md-list-item>Pay attention to the eyes and eyebrows. </md-list-item>
+                    <md-list-item>DeepFakes often fail to fully represent the natural physics of lighting.</md-list-item>
+                  </md-list>
+                </md-card-content>
+
+                <md-card-content v-else>
+                  That's not correct. If it sounds too incredulous and ridicules someone, there is a high probability it
+                  is satirical!
+                </md-card-content>
+
+                <md-button class="md-accent" v-on:click="submitRating">Got it</md-button>
+              </md-card-expand-content>
 
             </md-card>
             <!-- Video // Fake Headline -->
-
           </div>
 
 
@@ -142,16 +191,16 @@ async function fetchFeedElements(callback) {
         //
         // this.userInteractionEvents.push(event);
         let nextCard = this.currentCardIndex + 1;
+
         if (nextCard !== (this.feedElements).length) {
           this.currentCard = this.feedElements[nextCard];
-          this.currentCardType = this.feedElements[nextCard].type;
           this.currentCardIndex = this.currentCardIndex+1;
-
-
+          this.currentCardType = this.feedElements[this.currentCardIndex].CARDTYPE;
         }
 
         else {
           this.reachedEndOfFeed = true;
+          this.currentCardIndex = 0;
           this.currentCard = null;
           // TODO send interaction events to database
         }
@@ -169,7 +218,18 @@ async function fetchFeedElements(callback) {
             if (card["CARDTYPE"] === 'V') {
               this.feedElements[index].video_id = getIdFromURL(card["sourcelink"])
             }
+
+            if (card["CARDTYPE"] === 'V') {
+              this.feedElements[index].vfake = this.feedElements[index].vfake ? "1" : "0";
+            }
+
+            if (card["CARDTYPE"] === 'H') {
+              this.feedElements[index].hfake = this.feedElements[index].hfake ? "1" : "0";
+            }
+            console.log(card);
           })
+
+
         }
       }
     }
