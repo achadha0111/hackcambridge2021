@@ -5,12 +5,12 @@
       <!-- News card -->
       <md-card v-if="currentCardType === 'P'">
         <md-card-header>
-          <div class="md-title">{{feedElements[currentCard].headline}}</div>
-          <div class="md-subhead">{{feedElements[currentCard].friends_interactions}}</div>
+          <div class="md-title">{{feedElements[currentCard]["headline"]}}</div>
+<!--          <div class="md-subhead">{{feedElements[currentCard].friends_interactions}}</div>-->
         </md-card-header>
 
         <md-card-content>
-          {{ feedElements[currentCard].news_summary}}
+<!--          <a :href = feedElements[currentCard]["opinion_source"]>{{feedElements[currentCard]["opinion_source"]}}</a>-->
           <h3 class="md-subheading">Where do you think this article lies on the political spectrum?</h3>
           <div class="rating-spectrum">
             <md-radio v-model="rating" value="sLeft">Strongly Left</md-radio>
@@ -28,9 +28,9 @@
       <!-- News card -->
 
       <!-- Video -->
-      <md-card v-if="currentCardType === 'video' || currentCardType === 'fake_headline'">
+      <md-card v-if="currentCardType === 'V' || currentCardType === 'FH'">
         <md-card-header>
-          <div v-if="currentCardType === 'video'"
+          <div v-if="currentCardType === 'V'"
                class="md-title">Is this video fake?</div>
           <div v-else class="md-title"> Is this a misleading headline?</div>
           <div class="md-subhead">Answer yes or no to proceed</div>
@@ -39,15 +39,14 @@
         <md-card-media>
           <!-- Todo add video link -->
 <!--          <img src="/assets/examples/avatar-2.jpg" alt="People">-->
-          <youtube-media v-if="currentCardType === 'video'"
+          <youtube-media v-if="currentCardType === 'V'"
                          :video-id="feedElements[currentCard].id"></youtube-media>
-          <img v-else :src=feedElements[currentCard].img_link alt="People">
         </md-card-media>
 
         <md-card-content>
-          <div v-if="currentCardType === 'fake_headline'">
-            <h2>{{feedElements[currentCard].headline}}</h2>
-          </div>
+<!--          <div v-if="currentCardType === 'fake_headline'">-->
+<!--            <h2>{{feedElements[currentCard].headline}}</h2>-->
+<!--          </div>-->
 
           <div class="rating-spectrum">
             <md-radio v-model="rating" :value=1>Fake</md-radio>
@@ -137,8 +136,9 @@ async function fetchFeedElements(callback) {
           console.log(this.error);
         } else {
           this.feedElements = feedElements.data;
-          console.log(this.feedElements);
-          this.currentCardType = this.feedElements[this.currentCard];
+          this.currentCardType = this.feedElements[this.currentCard].CARDTYPE;
+          console.log(typeof this.feedElements);
+          console.log(this.feedElements[0]);
         }
       }
     }
