@@ -44,9 +44,16 @@
         <md-card-media>
           <!-- Todo add video link -->
 <!--          <img src="/assets/examples/avatar-2.jpg" alt="People">-->
+          <youtube-media v-if="currentCardType === 'video'"
+                         :video-id="feedElements[currentCard].id"></youtube-media>
+          <img v-else :src=feedElements[currentCard].img_link alt="People">
         </md-card-media>
 
         <md-card-content>
+          <div v-if="currentCardType === 'fake_headline'">
+            <h2>{{feedElements[currentCard].headline}}</h2>
+          </div>
+
           <div class="rating-spectrum">
             <md-radio v-model="rating" :value=1>Fake</md-radio>
             <md-radio v-model="rating" :value=0>Not fake</md-radio>
@@ -57,9 +64,10 @@
           <md-button v-on:click="submitRating">Submit</md-button>
         </md-card-actions>
       </md-card>
-      <!-- Video -->
+      <!-- Video // Fake Headline -->
 
     </div>
+    <div v-else>You have reached the end of your feed, check back later :)</div>
   </div>
 </template>
 
@@ -74,6 +82,8 @@
 </style>
 
 <script>
+  import connection from "@/db_config/db_config";
+
   export default {
     name: "Feed",
     data: () => ({
@@ -84,6 +94,10 @@
       rating: null,
       userInteractionEvents: [],
     }),
+
+    // created() {
+    //
+    // },
 
     methods: {
       submitRating: () => {
@@ -102,7 +116,7 @@
 
         else {
           this.reachedEndOfFeed = true;
-          <!-- TODO send interaction events to database-->
+          // TODO send interaction events to database
         }
       }
     }
